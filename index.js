@@ -9,7 +9,7 @@ const dgram = require("dgram");
 
 const inspectorAddr = process.env.INSPECTOR_LOGSTREAM_LISTEN_ADDR;
 
-exports.handler = (event, context, callback) => {
+exports.handler = async (event, context, callback) => {
   if (!inspectorAddr) {
     const err = "missing INSPECTOR_LOGSTREAM_LISTEN_ADDR env variable";
     console.log(err);
@@ -18,8 +18,10 @@ exports.handler = (event, context, callback) => {
   }
   console.log(`inspector addr: ${inspectorAddr}`);
   const arr = inspectorAddr.split(":");
-  if (arr.length !== 2){
-    callback(`invalid inspector addr format: ${inspectorAddr}. Expected host:port`);
+  if (arr.length !== 2) {
+    callback(
+      `invalid inspector addr format: ${inspectorAddr}. Expected host:port`,
+    );
     return;
   }
 
@@ -29,8 +31,10 @@ exports.handler = (event, context, callback) => {
   if (event.awslogs) {
     console.log("awslogs event");
     const payload = new Buffer.from(event.awslogs.data, "base64"); // decode base64 to binary
-    return gunzip(payload).then((result) => {
-      const parsedRequest = JSON.parse(result.toString("utf8"));
+    const result = await gunzip(payload);
+    const parsedRequest = JSON.parse(result.toString("utf8"));
+
+    await new Promise((resolve) => {
       for (let i = 0; i < parsedRequest.logEvents.length; i++) {
         if (
           parsedRequest.logEvents[i].message.length &&
@@ -59,6 +63,7 @@ exports.handler = (event, context, callback) => {
                 null,
                 `sent ${parsedRequest.logEvents.length} lines for inspection`,
               );
+              resolve();
             }
           },
         );
@@ -78,15 +83,16 @@ exports.handler = (event, context, callback) => {
       Key: key,
     });
 
-    return s3Client.send(getObjectCommand).then((response) => {
-      const lineReader = readline.createInterface({
-        input: response.Body.pipe(zlib.createGunzip()),
-      });
+    const response = await s3Client.send(getObjectCommand);
+    const lineReader = readline.createInterface({
+      input: response.Body.pipe(zlib.createGunzip()),
+    });
 
-      let lineCount = 0;
-      let sentCount = 0;
-      let last = false;
+    let lineCount = 0;
+    let sentCount = 0;
+    let last = false;
 
+    await new Promise((resolve) => {
       lineReader.on("line", (line) => {
         if (line[0] !== "#") {
           const message = Buffer.from(line + "\n");
@@ -107,6 +113,7 @@ exports.handler = (event, context, callback) => {
                 client.close();
                 console.log(`sent ${sentCount} lines for inspection`);
                 callback(null, `sent ${sentCount} lines for inspection`);
+                resolve();
               }
             },
           );
