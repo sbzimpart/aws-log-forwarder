@@ -44,7 +44,10 @@ exports.handler = async (event, context, callback) => {
         }
 
         const current = i;
-        const message = Buffer.from(parsedRequest.logEvents[i].message + "\n");
+
+        const message = parsedRequest.logEvents[i].message.endsWith("\n")
+          ? Buffer.from(parsedRequest.logEvents[i].message)
+          : Buffer.from(parsedRequest.logEvents[i].message + "\n");
         client.send(
           message,
           0,
