@@ -4,8 +4,8 @@ Lambda function to stream ec2 loadbalancer access logs and cloudwatch logs to im
 
 ## Logstream ingestion configuration
 
-1. Create a [Log Binding](https://console.impartsecurity.net/orgs/_/log-bindings)
-   Specify grok pattern for the expected log format. The following fields are supported and required to be resolved:
+1. Create a [Log Binding](https://console.impartsecurity.net/orgs/_/log-bindings).
+   Specify grok pattern for the expected log format and file name which will be used in the inspector configuration in step 2. The following fields are supported and required to be resolved:
 
 - timestamp - request timestamp, `HTTPDATE` and `TIMESTAMP_ISO8601` time formats are supported automatically. For custom time format provide layout in the grok: `%{GREEDYDATA:timestamp:ts-"2006-01-02 15:04:05.000"}`
 - request - request url. Can include query string parameters if available
@@ -17,7 +17,7 @@ Lambda function to stream ec2 loadbalancer access logs and cloudwatch logs to im
 ```
 INSPECTOR_MODE: "log_stream_server"
 INSPECTOR_LOGSTREAM_LISTEN_ADDR: ":<port>"
-INSPECTOR_LOGSTREAM_LOG_NAME: "<log_binding_name>" # from step 1
+INSPECTOR_LOGSTREAM_LOG_FILE_NAME: "<log_binding_file_name>" # from step 1
 INSPECTOR_API_ACCESS_TOKEN: "<access_token>" # setup here https://console.impartsecurity.net/orgs/_/integrations/inspector. Click `New inspector access token`
 ```
 
