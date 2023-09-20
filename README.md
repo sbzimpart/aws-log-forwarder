@@ -18,7 +18,7 @@ Lambda function to stream ec2 loadbalancer access logs and cloudwatch logs to im
 INSPECTOR_MODE: "log_stream_server"
 INSPECTOR_LOGSTREAM_LISTEN_ADDR: ":<port>"
 INSPECTOR_LOGSTREAM_LOG_FILE_NAME: "<log_binding_file_name>" # from step 1
-INSPECTOR_API_ACCESS_TOKEN: "<access_token>" # setup here https://console.impartsecurity.net/orgs/_/integrations/inspector. Click `New inspector access token`
+INSPECTOR_API_ACCESS_TOKEN: "<access_token>" # setup here https://console.impartsecurity.net/orgs/_/settings/tokens#create. Click `New inspector access token`
 ```
 
 3. Run the lambda function subscribed either to cloud watch events or elb s3 events.
@@ -33,7 +33,7 @@ INSPECTOR_LOGSTREAM_LISTEN_ADDR: "<inspector_host>:<port>" # from step 2
 For elb access logs:
 
 ```
-%{TIMESTAMP_ISO8601:timestamp} %{NOTSPACE:loadbalancer} %{IP:client_ip}:%{NUMBER:client_port} (?:%{IP:backend_ip}:%{NUMBER:backend_port}|-) %{NUMBER:request_processing_time} %{NUMBER:backend_processing_time} %{NUMBER:response_processing_time} (?:%{NUMBER:response_code}|-) (?:%{NUMBER:backend_status_code}|-) %{NUMBER:received_bytes} %{NUMBER:sent_bytes} "(?:%{WORD:http_method}|-) (?:%{GREEDYDATA:request}|-) (?:HTTP/%{NUMBER:httpversion}|-( )?)" "%{DATA:userAgent}"( %{NOTSPACE:ssl_cipher} %{NOTSPACE:ssl_protocol})?
+%{TIMESTAMP_ISO8601:timestamp} %{NOTSPACE:loadbalancer} %{IP:client_ip}:%{NUMBER:client_port} (?:%{IP:backend_ip}:%{NUMBER:backend_port}|-) %{NUMBER:request_processing_time} %{NUMBER:backend_processing_time} %{NUMBER:response_processing_time} (?:%{NUMBER:response_code}|-) (?:%{NUMBER:backend_status_code}|-) %{NUMBER:received_bytes} %{NUMBER:sent_bytes} "(?:%{WORD:http_method}|-) (?:%{GREEDYDATA:request}|-) (?:HTTP/%{NUMBER:http_version}|-( )?)" "%{DATA:user_agent}"( %{NOTSPACE:ssl_cipher} %{NOTSPACE:ssl_protocol})?
 ```
 
 For api gateway cloudwatch access logs if the log format set to:
@@ -43,5 +43,5 @@ $context.requestTime "$context.httpMethod $context.path $context.protocol" $cont
 ```
 
 ```
-%{HTTPDATE:timestamp} "(?:%{WORD:http_method}|-) (?:%{GREEDYDATA:request}|-) (?:HTTP/%{NUMBER:httpversion}|-( )?)" (?:%{NUMBER:response_code}|-)
+%{HTTPDATE:timestamp} "(?:%{WORD:http_method}|-) (?:%{GREEDYDATA:request}|-) (?:HTTP/%{NUMBER:http_version}|-( )?)" (?:%{NUMBER:response_code}|-)
 ```
