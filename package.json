@@ -10,10 +10,10 @@
     "lint": "eslint . --cache --ext .js --max-warnings=0"
   },
   "dependencies": {
-    "aws-sdk": "^2.1434.0"
+    "aws-sdk": "^2.1467.0"
   },
   "devDependencies": {
-    "eslint": "^8.48.0",
+    "eslint": "^8.50.0",
     "prettier": "^3.0.2"
   }
 }
