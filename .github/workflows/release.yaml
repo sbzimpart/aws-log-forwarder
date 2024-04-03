@@ -1,0 +1,25 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Package
+        run: |
+          npm ci
+          zip -r aws-log-forwarder.zip  . -i "*.js" "*.json" "node_modules" VERSION LICENSE
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            aws-log-forwarder.zip
